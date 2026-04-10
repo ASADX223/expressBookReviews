@@ -3,7 +3,7 @@ let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
-
+const axios = require('axios');
 
 public_users.post("/register", (req, res) => {
   const { username, password } = req.body;
@@ -77,6 +77,25 @@ public_users.get('/review/:isbn', function (req, res) {
   } else {
     return res.status(404).json({ message: "Book not found" });
   }
+});
+
+// 🔥 Using async/await with Axios (get all books)
+public_users.get('/async/books', async (req, res) => {
+  try {
+    const response = await axios.get('http://localhost:3000/');
+    return res.json(response.data);
+  } catch (err) {
+    return res.status(500).json({ message: "Error fetching books" });
+  }
+});
+
+// 🔥 Using promises with Axios (get book by ISBN)
+public_users.get('/promise/isbn/:isbn', (req, res) => {
+  const isbn = req.params.isbn;
+
+  axios.get(`http://localhost:3000/isbn/${isbn}`)
+    .then(response => res.json(response.data))
+    .catch(() => res.status(500).json({ message: "Error fetching book" }));
 });
 
 module.exports.general = public_users;
